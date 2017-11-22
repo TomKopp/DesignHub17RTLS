@@ -11,9 +11,20 @@ module.exports = {
 	"rules": {
 		"accessor-pairs": "error",
 		"array-bracket-newline": "error",
-		"array-bracket-spacing": "error",
+		"array-bracket-spacing": [
+			"error",
+			"always",
+			{
+				"singleValue": false
+			}
+		],
 		"array-callback-return": "error",
-		"array-element-newline": "error",
+		"array-element-newline": [
+			"error",
+			{
+				"multiline": true
+			}
+		],
 		"arrow-body-style": "error",
 		"arrow-parens": [
 			"error",
@@ -162,7 +173,7 @@ module.exports = {
 		"no-octal-escape": "error",
 		"no-param-reassign": "error",
 		"no-path-concat": "error",
-		"no-plusplus": "error",
+		"no-plusplus": "off",
 		"no-process-env": "off",
 		"no-process-exit": "error",
 		"no-proto": "error",
