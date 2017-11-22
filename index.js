@@ -23,15 +23,15 @@ const baudRate = 921600
  *   productId: 'EA60' } ]
  */
 
-const spawnPort = (port) => spawn('node serialPort.js', [ port.comName, port.serialNumber, baudRate ], { detached: true, shell: true })
+const spawnPortHandler = (port) => spawn('node serialPort.js', [ port.comName, port.serialNumber, baudRate ], { detached: true, shell: true })
 
 
 SerialPort
 	.list()
-	.then((ports) => ports.map((port) => spawnPort(port)))
-	.then((spans) => spans.forEach((span) => {
-		span.stdout.on('data', (data) => process.stdout.write(`stdout: ${data}`))
-		span.stderr.on('data', (data) => process.stderr.write(`\nstderr: ${data}`))
-		span.on('close', (code) => process.stderr.write(`\nchild process exited with code ${code}\n`))
+	.then((ports) => ports.map((port) => spawnPortHandler(port)))
+	.then((spawns) => spawns.forEach((spawn) => {
+		spawn.stdout.on('data', (data) => process.stdout.write(`stdout: ${data}`))
+		spawn.stderr.on('data', (data) => process.stderr.write(`\nstderr: ${data}`))
+		spawn.on('close', (code) => process.stderr.write(`\nchild process exited with code ${code}\n`))
 	}))
 	.catch((reason) => process.stdout.write(reason.message))
