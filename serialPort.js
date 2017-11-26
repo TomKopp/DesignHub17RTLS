@@ -1,9 +1,9 @@
 const SerialPort = require('serialport')
-const trilat = require('trilat')
+const { debuglog, inspect } = require('util')
 
 
 /**
- * [process.argv description]
+ * process.argv example content
  * @type array
  * @example
  * [ 'C:\\Program Files\\nodejs\\node.exe',
@@ -12,76 +12,69 @@ const trilat = require('trilat')
  * '00BCAC79',
  * '921600' ]
  */
-process.stdout.write(`isTTY: ${process.stdout.isTTY}`)
 const [ ,, comName, serialNumber, baudRate ] = process.argv
 const serialPort = new SerialPort(comName, { baudRate: parseInt(baudRate, 10) })
 const parser = serialPort.pipe(new SerialPort.parsers.Readline({ delimiter: '\r\n' }))
-const ranges = new Map()
+const debugLogger = debuglog('debug')
+const tagsMatches = new Map()
 let tagCount = 0
 
 
 /**
- * Split readline from serial port into capture groups.
- * @param  {string} line readline
- * @return {array}      capture groups
+ * Split readline from serial port into capture groups
+ * @param	{string} 	line		readline
+ * @param	{regExp} 	[regEx=(/.*\/)]	regular expression to match against the line
+ * @returns	{array}					capture groups
  */
-const splitLine = (line) => {
-	const [ , ...captureGroups ] = (/(SRC\s\d*)(?:\s*LQI\s\d{1,3}%\s*)(DIST\s\d*\.\d*)/).exec(line)
+const splitLine = (line, regEx = (/.*/)) => {
+	const [ , ...captureGroups ] = regEx.exec(line)
 
 	return captureGroups
 }
 
 /**
- * Splits matches and puts them in object.
- * @param  {array} matches array of caputre groups
- * @return {object}         { src: 1234, dist: 1.23 (in m) }
+ * Split line with special regular expression for BeSpoon tracking
+ * @param	{string}	line	string that schould be split
+ * @returns	{array}				array of capture groups
  */
-const matchesToObj = (matches) => matches
-	.map((el) => el.split(/\s/))
-	.reduce((carry, [ param, val ]) => {
-		carry[param.toLowerCase()] = parseFloat(val)
-
-		return carry
-	}, {})
+const splitLineRegEx = (line) => splitLine(line, /SRC\s(\d*)(?:\s*LQI\s\d{1,3}%\s*)DIST\s(\d*\.\d*)/)
 
 /**
- * Determine if enough ranges from different tags are recorded.
- * Has side effects!
- * @param  {object} range range object: { src: 1234, dist: 1.23 (in m) }
- * @return {boolean}       true if count of measurments equals count of tags, but more than two
+ * http://2ality.com/2015/08/es6-map-json.html
+ * @param	{map}		map		Map of tags
+ * @returns	{string}			JSON.stringifyed map
  */
-const captureRanges = (range) => {
-	ranges.set(range.src, range.dist)
+const mapToJson = (map) => JSON.stringify([...map])
+
+/**
+ * Capture matches into map using src id and dist value
+ * @param	{array}		matches	array of capture groups
+ * @returns	{boolean}			true if tagCount matches tag quantity but only if greater than 2
+ */
+const captureMatches = (matches) => {
+	const [ src, dist ] = matches
+
+	tagsMatches.set(parseInt(src, 10), parseFloat(dist))
 	tagCount++
-	tagCount %= ranges.size
+	tagCount %= tagsMatches.size
 
 	// eslint-disable-next-line no-magic-numbers
-	return tagCount === 0 && ranges.size > 2
-}
-
-const buildTrilat = (ranges) => {
-// 	const ret = [
-// //      X     Y     R
-//     [ 0.0,  0.0, 10.0],
-//     [10.0, 10.0, 10.0],
-//     [10.0,  0.0, 14.142135]
-// ]
-	const ret = []
-
-
-	return ret
+	return tagCount === 0 && tagsMatches.size > 2
+	// @TODO make pure and return a Maybe
 }
 
 
-process.stdout.write(`\n${serialNumber}\n`)
+process.stdout.write(`${serialNumber}`)
 parser.on('data', (data) => {
-	const range = matchesToObj(splitLine(data))
-
-	process.stdout.write(`src: ${range.src}; dist: ${range.dist}m`)
-	if (captureRanges(range)) {
-		process.stdout.write('----capture----\n')
-	} else {
-		process.stdout.write('\n')
+	if (captureMatches(splitLineRegEx(data))) {
+		debugLogger(inspect(tagsMatches))
+		// process.send([...tagsMatches])
+		process.stdout.write(mapToJson(tagsMatches))
 	}
 })
 parser.on('error', (err) => process.stderr.write(`\nPort err: ${err.message}`))
+
+process.on('unhandledRejection', (reason, p) => {
+	// application specific logging, throwing an error, or other logic here
+	process.stderr.write(`Unhandled Rejection at: Promise ${inspect(p)}\nreason: ${inspect(reason)}`)
+})
