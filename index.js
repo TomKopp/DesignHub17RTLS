@@ -1,4 +1,5 @@
-const { spawn } = require('child_process')
+const { fork } = require('child_process')
+const { inspect } = require('util')
 const SerialPort = require('serialport')
 
 
@@ -16,15 +17,16 @@ const baudRate = 921600
  *   productId: 'EA60' }
  * @returns {ChildProcess} handle
  */
-const spawnPortHandler = (port) => spawn('node serialPort.js', [ port.comName, port.serialNumber, baudRate ], { detached: true, shell: true })
+const forkPortHandler = (port) => fork('./serialPort.js', [ port.comName, port.serialNumber, baudRate ], { silent: true })
 
 
 SerialPort
 	.list()
-	.then((ports) => ports.map((port) => spawnPortHandler(port)))
+	.then((ports) => ports.map((port) => forkPortHandler(port)))
 	.then((spawns) => spawns.forEach((spawn) => {
-		spawn.stdout.on('data', (data) => process.stdout.write(`stdout: ${data}`))
+		spawn.stdout.on('data', (data) => process.stdout.write(`\nstdout: ${data}`))
 		spawn.stderr.on('data', (data) => process.stderr.write(`\nstderr: ${data}`))
+		spawn.on('message', (message) => process.stdout.write(`\n${inspect(message)}`))
 		spawn.on('close', (code) => process.stderr.write(`\nchild process exited with code ${code}\n`))
 	}))
-	.catch((err) => process.stdout.write(err.message))
+	.catch((err) => process.stderr.write(err.message))
