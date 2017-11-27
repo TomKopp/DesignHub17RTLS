@@ -21,6 +21,15 @@ let tagCount = 0
 
 
 /**
+ * Log messages to stderr, if NODE_DEBUG=debug
+ * @param	{any}	data any data will be parsed with util.inspect
+ * @returns	{void}
+ */
+const debugLoggerStderr = (data) => debugLogger(inspect(data))
+
+const loggerStderr = (data) => process.stderr.write(inspect(data))
+
+/**
  * Split readline from serial port into capture groups
  * @param	{string} 	line		readline
  * @param	{regExp} 	[regEx=(/.*\/)]	regular expression to match against the line
@@ -67,12 +76,12 @@ const captureMatches = (matches) => {
 process.stdout.write(`${serialNumber}`)
 parser.on('data', (data) => {
 	if (captureMatches(splitLineRegEx(data))) {
-		debugLogger(inspect(tagsMatches))
+		debugLoggerStderr(tagsMatches)
 		// process.send([...tagsMatches])
 		process.stdout.write(mapToJson(tagsMatches))
 	}
 })
-parser.on('error', (err) => process.stderr.write(`\nPort err: ${err.message}`))
+parser.on('error', loggerStderr)
 
 process.on('unhandledRejection', (reason, p) => {
 	// application specific logging, throwing an error, or other logic here

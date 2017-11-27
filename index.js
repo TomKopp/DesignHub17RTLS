@@ -19,14 +19,15 @@ const baudRate = 921600
  */
 const forkPortHandler = (port) => fork('./serialPort.js', [ port.comName, port.serialNumber, baudRate ], { silent: true })
 
+const loggerStderr = (data) => process.stderr.write(inspect(data))
 
 SerialPort
 	.list()
-	.then((ports) => ports.map((port) => forkPortHandler(port)))
+	.then((ports) => ports.map(forkPortHandler))
 	.then((spawns) => spawns.forEach((spawn) => {
 		spawn.stdout.on('data', (data) => process.stdout.write(`\nstdout: ${data}`))
-		spawn.stderr.on('data', (data) => process.stderr.write(`\nstderr: ${data}`))
+		spawn.stderr.on('data', loggerStderr)
 		spawn.on('message', (message) => process.stdout.write(`\n${inspect(message)}`))
 		spawn.on('close', (code) => process.stderr.write(`\nchild process exited with code ${code}\n`))
 	}))
-	.catch((err) => process.stderr.write(err.message))
+	.catch(loggerStderr)
