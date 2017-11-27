@@ -22,7 +22,21 @@
              "COM13",
              "00BCAC79",
              "921600"
-          ]
+          ],
+          "console": "integratedTerminal"
+        },
+        {
+          "type": "node",
+          "request": "launch",
+          "name": "Launch lateration",
+          "program": "${workspaceFolder}\\lateration.js",
+          "env": {
+            "NODE_DEBUG": "debug"
+          },
+          "args": [
+            "${workspaceFolder}\\tagPositions.json"
+          ],
+          "console": "integratedTerminal"
         }
     ]
 }
