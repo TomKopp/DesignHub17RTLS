@@ -8,13 +8,13 @@
             "type": "node",
             "request": "launch",
             "name": "Launch Program",
-            "program": "${workspaceFolder}\\index.js"
+            "program": "${workspaceFolder}\\src\\index.js"
         },
         {
           "type": "node",
           "request": "launch",
           "name": "Launch serialPort",
-          "program": "${workspaceFolder}\\serialPort.js",
+          "program": "${workspaceFolder}\\src\\serialPort.js",
           "env": {
             "NODE_DEBUG": "debug"
           },
@@ -29,12 +29,12 @@
           "type": "node",
           "request": "launch",
           "name": "Launch lateration",
-          "program": "${workspaceFolder}\\lateration.js",
+          "program": "${workspaceFolder}\\src\\lateration.js",
           "env": {
             "NODE_DEBUG": "debug"
           },
           "args": [
-            "${workspaceFolder}\\tagPositions.json"
+            "${workspaceFolder}\\config\\tagPositions.json"
           ],
           "console": "integratedTerminal"
         }
