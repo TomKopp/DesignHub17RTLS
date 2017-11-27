@@ -13,7 +13,7 @@ const rl = readline.createInterface({ input: process.stdin })
 /**
  * Log messages to stderr, if NODE_DEBUG=debug
  * @param	{any}	data any data will be parsed with util.inspect
- * @returns	{void}
+ * @returns	{any}	identity function
  */
 const debugLoggerStderr = (data) => {
 	debugLogger(inspect(data))
@@ -24,7 +24,7 @@ const debugLoggerStderr = (data) => {
 /**
  * Log messages to stderr
  * @param	{any}	data any data will be parsed with util.inspect
- * @returns	{void}
+ * @returns	{any}	identity function
  */
 const loggerStderr = (data) => {
 	process.stderr.write(inspect(data))

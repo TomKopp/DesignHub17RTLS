@@ -19,7 +19,16 @@ const baudRate = 921600
  */
 const forkPortHandler = (port) => fork('./serialPort.js', [ port.comName, port.serialNumber, baudRate ], { silent: true })
 
-const loggerStderr = (data) => process.stderr.write(inspect(data))
+/**
+ * Log messages to stderr
+ * @param	{any}	data any data will be parsed with util.inspect
+ * @returns	{any}	identity function
+ */
+const loggerStderr = (data) => {
+	process.stderr.write(inspect(data))
+
+	return data
+}
 
 SerialPort
 	.list()

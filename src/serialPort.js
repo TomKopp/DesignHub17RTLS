@@ -23,11 +23,24 @@ let tagCount = 0
 /**
  * Log messages to stderr, if NODE_DEBUG=debug
  * @param	{any}	data any data will be parsed with util.inspect
- * @returns	{void}
+ * @returns	{any}	identity function
  */
-const debugLoggerStderr = (data) => debugLogger(inspect(data))
+const debugLoggerStderr = (data) => {
+	debugLogger(inspect(data))
 
-const loggerStderr = (data) => process.stderr.write(inspect(data))
+	return data
+}
+
+/**
+ * Log messages to stderr
+ * @param	{any}	data any data will be parsed with util.inspect
+ * @returns	{any}	identity function
+ */
+const loggerStderr = (data) => {
+	process.stderr.write(inspect(data))
+
+	return data
+}
 
 /**
  * Split readline from serial port into capture groups
