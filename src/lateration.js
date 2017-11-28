@@ -66,19 +66,11 @@ const mergePositionsRanges = (positions, ranges) => {
 }
 
 /**
- * does effectively the same as a reduce
+ * Reduce the Map to an array of its values
  * @param	{Map}	data	[description]
  * @returns	{Array}			[description]
  */
-const mapToTrilatInput = (data) => {
-	const ret = []
-
-	data.forEach((val) => {
-		ret.push(val)
-	})
-
-	return ret
-}
+const mapToTrilatInput = (data) => [...data.values()]
 
 /**
  * [description]
