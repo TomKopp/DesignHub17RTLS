@@ -1,4 +1,5 @@
 const { fork } = require('child_process')
+const { resolve } = require('path')
 const { inspect } = require('util')
 const SerialPort = require('serialport')
 
@@ -19,6 +20,8 @@ const baudRate = 921600
  */
 const forkPortHandler = (port) => fork('./serialPort.js', [ port.comName, port.serialNumber, baudRate ], { silent: true })
 
+const forkTrilatHandler = (centerPointsJsonUri) => fork('./lateration.js', [centerPointsJsonUri], { silent: true })
+
 /**
  * Log messages to stderr
  * @param	{any}	data any data will be parsed with util.inspect
@@ -30,12 +33,23 @@ const loggerStderr = (data) => {
 	return data
 }
 
+const trilatSolver = forkTrilatHandler(resolve(__dirname, '..', 'config', 'tagPositions.json'))
+
+trilatSolver.stdout.pipe(process.stdout)
+trilatSolver.stderr.pipe(process.stderr)
+trilatSolver.on('message', (message) => process.stdout.write(`\n${inspect(message)}`))
+trilatSolver.on('close', (code) => process.stderr.write(`\nchild process exited with code ${code}\n`))
+
 SerialPort
 	.list()
 	.then((ports) => ports.map(forkPortHandler))
 	.then((spawns) => spawns.forEach((spawn) => {
-		spawn.stdout.on('data', (data) => process.stdout.write(`\nstdout: ${data}`))
-		spawn.stderr.on('data', loggerStderr)
+		// spawn.stdout.pipe(trilatSolver.stdin)
+		// spawn.stdout.pipe(process.stdout)
+		spawn.stdout.on('data', (data) => {
+			trilatSolver.stdin.write(`${data}\n`)
+		})
+		spawn.stderr.pipe(process.stderr)
 		spawn.on('message', (message) => process.stdout.write(`\n${inspect(message)}`))
 		spawn.on('close', (code) => process.stderr.write(`\nchild process exited with code ${code}\n`))
 	}))

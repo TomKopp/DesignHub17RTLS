@@ -33,6 +33,17 @@ const loggerStderr = (data) => {
 }
 
 /**
+ * Writes JSON stringified data to stdout
+ * @param	{any}	data	[description]
+ * @returns	{any}			[description]
+ */
+const writeJsonToStdout = (data) => {
+	process.stdout.write(JSON.stringify(data))
+
+	return data
+}
+
+/**
  * http://2ality.com/2015/08/es6-map-json.html
  * @param	{string}	jsonStr		string representation of multidimensional array
  * @returns	{Promise}				resolves with Map containing ranges
@@ -97,8 +108,8 @@ readFileAsync(positionsConfigURI, 'utf8')
 	.then((fn) => {
 		rl.on('line', (line) => {
 			fn(line)
-				// write to stdout
-				.then(loggerStderr)
+				.then(writeJsonToStdout)
+				.catch(loggerStderr)
 		})
 	})
 	.catch(loggerStderr)
