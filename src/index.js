@@ -2,6 +2,7 @@ const { fork } = require('child_process')
 const { resolve } = require('path')
 const { inspect } = require('util')
 const SerialPort = require('serialport')
+const { loggerStderr } = require('./utils.js')
 
 
 const baudRate = 921600
@@ -20,18 +21,12 @@ const baudRate = 921600
  */
 const forkPortHandler = (port) => fork('./serialPort.js', [ port.comName, port.serialNumber, baudRate ], { silent: true })
 
-const forkTrilatHandler = (centerPointsJsonUri) => fork('./lateration.js', [centerPointsJsonUri], { silent: true })
-
 /**
- * Log messages to stderr
- * @param	{any}	data any data will be parsed with util.inspect
- * @returns	{any}	identity function
+ * [description]
+ * @param  {string} centerPointsJsonUri [description]
+ * @return {ChildProcess} [description]
  */
-const loggerStderr = (data) => {
-	process.stderr.write(inspect(data))
-
-	return data
-}
+const forkTrilatHandler = (centerPointsJsonUri) => fork('./lateration.js', [centerPointsJsonUri], { silent: true })
 
 const trilatSolver = forkTrilatHandler(resolve(__dirname, '..', 'config', 'tagPositions.json'))
 
