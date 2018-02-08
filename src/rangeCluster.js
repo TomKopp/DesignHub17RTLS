@@ -5,7 +5,7 @@ const { performance } = require('perf_hooks')
  * @param {string|number} serialNumber [description]
  * @returns {RangeCluster} [description]
  */
-function RangeCluster(serialNumber) {
+const RangeCluster = function RangeCluster(serialNumber) {
 	this.ranges = new Map()
 	this.serialNumber = serialNumber
 	this.timestamp = null
