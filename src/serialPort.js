@@ -15,8 +15,7 @@ const RangeCluster = require('./rangeCluster.js')
  * '921600' ]
  */
 const [ ,, comName, serialNumber, baudRate ] = process.argv
-const serialPort = new SerialPort(comName, { baudRate: parseInt(baudRate, 10) })
-const parser = serialPort.pipe(new SerialPort.parsers.Readline({ delimiter: '\r\n' }))
+const parser = new SerialPort(comName, { baudRate: parseInt(baudRate, 10) }).pipe(new SerialPort.parsers.Readline({ delimiter: '\r\n' }))
 const tagsMatches = new RangeCluster(serialNumber)
 
 
