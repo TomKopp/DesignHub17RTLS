@@ -1,6 +1,7 @@
 const { fork } = require('child_process')
 const { resolve } = require('path')
 const { inspect } = require('util')
+const { createWriteStream } = require('fs')
 const SerialPort = require('serialport')
 const { loggerStderr } = require('./utils.js')
 
@@ -28,7 +29,8 @@ const forkPortHandler = (port) => fork('./serialPort.js', [ port.comName, port.s
  */
 const forkTrilatHandler = (centerPointsJsonUri) => fork('./lateration.js', [centerPointsJsonUri], { silent: true })
 
-const trilatSolver = forkTrilatHandler(resolve(__dirname, '..', 'config', 'tagPositions.json'))
+const $fileWrite = createWriteStream(resolve(process.cwd(), 'data', `trackData-'${new Date()}.json`), { flags: 'a' })
+const trilatSolver = forkTrilatHandler(resolve(process.cwd(), 'config', 'tagPositions.json'))
 
 trilatSolver.stdout.pipe(process.stdout)
 trilatSolver.stderr.pipe(process.stderr)
@@ -45,7 +47,8 @@ SerialPort
 			trilatSolver.stdin.write(`${data}\n`)
 		})
 		spawn.stderr.pipe(process.stderr)
-		spawn.on('message', (message) => process.stdout.write(`\n${inspect(message)}`))
+		// spawn.on('message', (message) => process.stdout.write(`\n${inspect(message)}`))
+		spawn.on('message', (message) => $fileWrite.write(`\n${inspect(message)}`))
 		spawn.on('close', (code) => process.stderr.write(`\nchild process exited with code ${code}\n`))
 	}))
 	.catch(loggerStderr)
