@@ -35,6 +35,7 @@ const trilatSolver = forkTrilatHandler(resolve(process.cwd(), 'config', 'tagPosi
 trilatSolver.stdout.pipe(process.stdout)
 trilatSolver.stderr.pipe(process.stderr)
 trilatSolver.on('message', (message) => process.stdout.write(`\n${inspect(message)}`))
+trilatSolver.on('message', (message) => $fileWrite.write(`\n${inspect(message)}`))
 trilatSolver.on('close', (code) => process.stderr.write(`\nchild process exited with code ${code}\n`))
 
 SerialPort
@@ -47,8 +48,7 @@ SerialPort
 			trilatSolver.stdin.write(`${data}\n`)
 		})
 		spawn.stderr.pipe(process.stderr)
-		// spawn.on('message', (message) => process.stdout.write(`\n${inspect(message)}`))
-		spawn.on('message', (message) => $fileWrite.write(`\n${inspect(message)}`))
+		spawn.on('message', (message) => process.stdout.write(`\n${inspect(message)}`))
 		spawn.on('close', (code) => process.stderr.write(`\nchild process exited with code ${code}\n`))
 	}))
 	.catch(loggerStderr)
