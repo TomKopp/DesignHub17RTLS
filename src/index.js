@@ -29,7 +29,7 @@ const forkPortHandler = (port) => fork('./serialPort.js', [ port.comName, port.s
  */
 const forkTrilatHandler = (centerPointsJsonUri) => fork('./lateration.js', [centerPointsJsonUri], { silent: true })
 
-const $fileWrite = createWriteStream(resolve(process.cwd(), 'data', `trackData-'${new Date()}.json`), { flags: 'a' })
+const $fileWrite = createWriteStream(resolve(process.cwd(), 'data', `trackData-${new Date()}.json`), { flags: 'a' })
 const trilatSolver = forkTrilatHandler(resolve(process.cwd(), 'config', 'tagPositions.json'))
 
 trilatSolver.stdout.pipe(process.stdout)
