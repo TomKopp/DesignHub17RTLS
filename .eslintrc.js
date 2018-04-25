@@ -22,7 +22,8 @@ module.exports = {
 		"array-element-newline": [
 			"error",
 			{
-				"multiline": true
+				"multiline": true,
+				"minItems": 4
 			}
 		],
 		"arrow-body-style": "error",
